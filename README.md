@@ -5,7 +5,7 @@ This paper includes two contributions:
 1) A generalization of ELU which encompasses ReLU, LReLU and PReLU.
 2) A weight initialization, named taylor initialization, for ELU/MPELU which can also be used in ReLU and PReLU cases.
 
-# Install
+# Installation
 This implementation is based on [Caffe](https://github.com/Coldmooon/caffe) and compatible with the latest version.
 Just copy files into caffe and follow the [instruction](http://caffe.berkeleyvision.org/installation.html) to compile.
 
