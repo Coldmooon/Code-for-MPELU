@@ -1,4 +1,4 @@
-net: "layer52_elu_taylor_FAN_IN_withoutBN.prototxt"
+net: "examples/mpelu/layer52_elu_taylor_FAN_IN_withoutBN.prototxt"
 test_iter: 1000
 test_interval: 1000
 test_initialization: false
