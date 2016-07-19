@@ -1,0 +1,16 @@
+net: "layer30_elu_taylor_FAN_IN_withoutBN.prototxt"
+test_iter: 1000
+test_interval: 1000
+test_initialization: false
+base_lr: 0.01
+lr_policy: "multistep"
+gamma: 0.1
+stepvalue: 100000
+stepvalue: 600000
+display: 20
+max_iter: 750000
+momentum: 0.9
+weight_decay: 0.0005
+snapshot: 10000
+snapshot_prefix: "layer30_elu_taylor_FAN_IN_withoutBN"
+solver_mode: GPU
