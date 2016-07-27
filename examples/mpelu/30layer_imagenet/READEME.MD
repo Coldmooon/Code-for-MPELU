@@ -2,7 +2,6 @@
 
 ### 30-layer network without BatchNorm
 
-|         |  MSRA init   | Taylor init |
 |   Mode  | ReLU | PReLU | ELU | MPELU |
 | --------|-----:|------:|----:|:------|
 | AVERAGE |  X   |   X   |  Y  |   Y   |
