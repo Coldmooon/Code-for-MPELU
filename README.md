@@ -7,6 +7,24 @@ The main contributions are:
 - A weight initialization, named taylor initialization, for very deep networks using ELU/MPELU. If used with ReLU neworks, it reduces to MSRA filler.
 - A deep MPELU residual architecture that is more effective than the original (Pre-)ResNet one.
 
+##Deep MPELU residual architecture
+
+MPELU nopre bottleneck architecture:
+
+![img](torch/models/MPELU-NoPre-ResNet.jpg)
+
+##Test error on CIFAR-10/100
+
+MPELU nopre ResNet: best(mean ± std)
+
+Network | alpha & beta | depth | #params | CIFAR-10 | CIFAR-100 
+-------|:-------:|:--------:|:--------:|:--------:|:--------:|
+MPELU nopre ResNet |alpha = 1; beta = 1 | 164 | 1.696M | 4.58 (4.67 ± 0.06) | 21.35 (21.78 ± 0.33)
+MPELU nopre ResNet |alpha = 1; beta = 1 | 1001 | 10.28M | 3.63 (3.78 ± 0.09) | 18.96 (19.08 ± 0.16)
+MPELU nopre ResNet |alpha = 0.25; beta = 1 | 164 | 1.696M | 4.43 (4.53 ± 0.12) | 21.69 (21.88 ± 0.19)
+MPELU nopre ResNet |alpha = 0.25; beta = 1 | 1001 | 10.28M | **3.57 (3.71 ± 0.11)** | **18.81 (18.98 ± 0.19)**
+
+
 ## Installation
 We provide [Caffe](https://github.com/Coldmooon/caffe) and [Torch](http://torch.ch/) implementations.
 
@@ -72,18 +90,19 @@ See the examples for details.
 
 **MPELU of naive version**:
 
-include `require '/path/to/naive-mpelu'` in your code. Then,
-
 ```
+require '/path/to/naive-mpelu'
+
 model = nn.Sequential()
 model:add(MPELU(alpha, beta, alpha_lr_mult, beta_lr_mult, alpha_wd_mult, beta_wd_mult, num_of_channels))
 ```
 
 **MPELU corresponding to Eqn.(1) in our paper**:
 
-include `require '/path/to/mpelu'` in your code. Then,
 
 ```
+require '/path/to/mpelu'
+
 model = nn.Sequential()
 model:add(MPELU(alpha, beta, alpha_lr_mult, beta_lr_mult, alpha_wd_mult, beta_wd_mult, num_of_channels))
 ```
@@ -92,22 +111,7 @@ This version is slightly faster than the naive one.
 **Taylor filler**: Please check our examples.
 
 
-##Deep MPELU residual architecture
 
-MPELU nopre bottleneck architecture:
-
-![img](torch/models/MPELU-NoPre-ResNet.jpg)
-
-##Test error on CIFAR-10/100
-
-MPELU nopre ResNet: best(mean ± std)
-
-Network | alpha & beta | depth | # params | CIFAR-10 | CIFAR-100 
--------|:-------:|:--------:|:--------:|:--------:|:--------:|
-MPELU nopre ResNet |alpha = 1; beta = 1 | 164 | 1.696M | 4.58 (4.67 ± 0.06) | 21.35 (21.78 ± 0.33)
-MPELU nopre ResNet |alpha = 1; beta = 1 | 1001 | 10.28M | 3.63 (3.78 ± 0.09) | 18.96 (19.08 ± 0.16)
-MPELU nopre ResNet |alpha = 0.25; beta = 1 | 164 | 1.696M | 4.43 (4.53 ± 0.12) | 21.69 (21.88 ± 0.19)
-MPELU nopre ResNet |alpha = 0.25; beta = 1 | 1001 | 10.28M | 3.57 (3.71 ± 0.11) | 18.81 (18.98 ± 0.19)
 
 
 
