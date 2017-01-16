@@ -104,10 +104,10 @@ MPELU nopre ResNet: best(mean ± std)
 
 Network | alpha & beta | depth | # params | CIFAR-10 | CIFAR-100 
 -------|:-------:|:--------:|:--------:|:--------:|:--------:|
-MPELU nopre ResNet |alpha = 1; beta = 1 | 164 | 1.696M | 4.58 (4.67 ± 0.06) | 21.35 (21.78 ± 0.33) 
+MPELU nopre ResNet |alpha = 1; beta = 1 | 164 | 1.696M | 4.58 (4.67 ± 0.06) | 21.35 (21.78 ± 0.33)
 MPELU nopre ResNet |alpha = 1; beta = 1 | 1001 | 10.28M | 3.63 (3.78 ± 0.09) | 18.96 (19.08 ± 0.16)
 MPELU nopre ResNet |alpha = 0.25; beta = 1 | 164 | 1.696M | 4.43 (4.53 ± 0.12) | 21.69 (21.88 ± 0.19)
-MPELU nopre ResNet |alpha = 0.25; beta = 1 | 1001 | 10.28M | 3.57 (3.71 ± 0.11) |18.81 (18.98 ± 0.19)
+MPELU nopre ResNet |alpha = 0.25; beta = 1 | 1001 | 10.28M | 3.57 (3.71 ± 0.11) | 18.81 (18.98 ± 0.19)
 
 
 
