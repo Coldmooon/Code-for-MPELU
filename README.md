@@ -15,15 +15,25 @@ MPELU nopre bottleneck architecture:
 
 ##Test error on CIFAR-10/100
 
-MPELU nopre ResNet: best(mean ± std)
+MPELU is initialized with alpha = 0.25 or 1 and beta = 1. The learning rate multipliers of alpha and beta are 5. The weight decay multipliers of alpha and beta are 5 or 10. The results are reported as best(mean ± std).
 
-Network | alpha & beta | depth | #params | CIFAR-10 | CIFAR-100 
+MPELU nopre ResNet | depth | #params | CIFAR-10 | CIFAR-100 
 -------|:-------:|:--------:|:--------:|:--------:|:--------:|
-MPELU nopre ResNet |alpha = 1; beta = 1 | 164 | 1.696M | 4.58 (4.67 ± 0.06) | 21.35 (21.78 ± 0.33)
-MPELU nopre ResNet |alpha = 1; beta = 1 | 1001 | 10.28M | 3.63 (3.78 ± 0.09) | 18.96 (19.08 ± 0.16)
-MPELU nopre ResNet |alpha = 0.25; beta = 1 | 164 | 1.696M | 4.43 (4.53 ± 0.12) | 21.69 (21.88 ± 0.19)
-MPELU nopre ResNet |alpha = 0.25; beta = 1 | 1001 | 10.28M | **3.57 (3.71 ± 0.11)** | **18.81 (18.98 ± 0.19)**
+alpha = 1; beta = 1 | 164 | 1.696M | 4.58 (4.67 ± 0.06) | 21.35 (21.78 ± 0.33)
+alpha = 1; beta = 1 | 1001 | 10.28M | 3.63 (3.78 ± 0.09) | 18.96 (19.08 ± 0.16)
+alpha = 0.25; beta = 1 | 164 | 1.696M | 4.43 (4.53 ± 0.12) | 21.69 (21.88 ± 0.19)
+alpha = 0.25; beta = 1 | 1001 | 10.28M | **3.57 (3.71 ± 0.11)** | **18.81 (18.98 ± 0.19)**
 
+To replicate our results,
+
+1. Install [fb.resnet.troch](https://github.com/facebook/fb.resnet.torch)
+2. Follow our instructions to install MPELU in torch.
+2. Copy files in `mpelu_nopre_resnet` to `fb.resnet.troch` and overwrite the original files.
+3. Run the following command to train a 1001-layer MPELU nopre ResNet
+
+```
+th main.lua -netType mpelu-preactivation-nopre -depth 1001 -batchSize 64 -nGPU 2 -nThreads 12 -dataset cifar10 -nEpochs 300 -shortcutType B -shareGradInput false -optnet true | tee checkpoints/log.txt
+``` 
 
 ## Installation
 We provide [Caffe](https://github.com/Coldmooon/caffe) and [Torch](http://torch.ch/) implementations.
