@@ -57,16 +57,18 @@ $ luarocks install nnlr
 3) Move `torch/extra` in this repo to the official torch directory and overwrite the corresponding files.
 
 
-4) naive version 1: MPELU = PReLU(ELU(PReLU(x))). 
+4) There are two naive versions. In the naive version 1, MPELU can be seen as a combination of PReLU and ELU, which is easy to implement and understand. In the naive version 2, we add a new layer SPELU, a learnable ELU, to torch. Then, MPELU is implemented with PReLU and SPELU. Formally,
 
-Just include `torch/naive-mpelu.lua` in your code. For example:
+naive version 1: MPELU = PReLU(ELU(PReLU(x))). 
+
+Just include `naive-mpelu.lua` in your code. For example:
 
 ```
 require '/path/to/naive-mpelu'
 ```
 naive version 2: MPELU = **ELU'**(PReLU(x)),
 
-where **ELU'** (implemented as `SPELU` in our code) means ELU with a learnbale parameter. Finally, compile the new layer `SPELU`:
+where **ELU'** (implemented as `SPELU` in our code) means ELU with a learnbale parameter. Compile the new layer `SPELU`:
 
 ```
 cd torch/extra/nn/
@@ -98,7 +100,7 @@ See the examples for details.
 
 ###Torch
 
-**MPELU of naive version**:
+**MPELU of naive version 1**,
 
 ```
 require '/path/to/naive-mpelu'
@@ -107,7 +109,7 @@ model = nn.Sequential()
 model:add(MPELU(alpha, beta, alpha_lr_mult, beta_lr_mult, alpha_wd_mult, beta_wd_mult, num_of_channels))
 ```
 
-**MPELU corresponding to Eqn.(1) in our paper**:
+**MPELU of naive version 2**, which is corresponding to Eqn.(1) in our paper. This version is slightly faster than the naive version 1.
 
 
 ```
@@ -116,9 +118,11 @@ require '/path/to/mpelu'
 model = nn.Sequential()
 model:add(MPELU(alpha, beta, alpha_lr_mult, beta_lr_mult, alpha_wd_mult, beta_wd_mult, num_of_channels))
 ```
-This version is slightly faster than the naive one.
+`alpha_lr_mult`, `beta_lr_mult`: the multiplier of learning rate for `alpha` and `beta`.
+`alpha_wd_mult`, `beta_wd_mult`: the multiplier of weight decay for `alpha` and `beta`.
+`num_of_channels`: Similar to PReLU, if `num_of_channels` is not given, `channel shared` is used.
 
-**Taylor filler**: Please check our examples.
+**Taylor filler**: Please check our examples in `mpelu_nopre_resnet`.
 
 
 
