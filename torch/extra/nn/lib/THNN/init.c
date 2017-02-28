@@ -89,6 +89,9 @@
 #include "generic/HardTanh.c"
 #include "THGenerateFloatTypes.h"
 
+#include "generic/GatedLinearUnit.c"
+#include "THGenerateFloatTypes.h"
+
 #include "generic/L1Cost.c"
 #include "THGenerateFloatTypes.h"
 
@@ -168,6 +171,9 @@
 #include "THGenerateFloatTypes.h"
 
 #include "generic/TemporalMaxPooling.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/TemporalRowConvolution.c"
 #include "THGenerateFloatTypes.h"
 
 #include "generic/BatchNormalization.c"

@@ -102,6 +102,18 @@ TH_API void THNN_(DistKLDivCriterion_updateGradInput)(
           THTensor *gradInput,         // [OUT] gradient w.r.t. input
           bool sizeAverage);           // if true, the loss will be normalized **by total number of elements**
 
+TH_API void THNN_(GatedLinear_updateOutput)(
+          THNNState *state,            // library's state
+          THTensor *input,             // input tensor
+          THTensor *output,            // [OUT] output tensor, half size of input along dimension dim
+          int dim);                    // dimension for halving operation
+TH_API void THNN_(GatedLinear_updateGradInput)(
+          THNNState *state,            // library's state
+          THTensor *input,             // input tensor
+          THTensor *gradOutput,        // gradient w.r.t module's output
+          THTensor *gradInput,         // [OUT] gradient w.r.t input
+          int dim);                    // dimension for halving operation
+
 // HardShink outputs 0 on interval of (-lambda; lambda) or original value otherwise.
 TH_API void THNN_(HardShrink_updateOutput)(
           THNNState *state,            // library's state
@@ -274,31 +286,6 @@ TH_API void THNN_(MultiMarginCriterion_updateGradInput)(
           THTensor *weights,      // [OPTIONAL]
           real margin);
 
-TH_API void THNN_(SPELU_updateOutput)(
-          THNNState *state,
-          THTensor *input,
-          THTensor *output,
-          THTensor *weight,
-          THIndex_t nOutputPlane);
-TH_API void THNN_(SPELU_updateGradInput)(
-          THNNState *state,
-          THTensor *input,
-          THTensor *gradOutput,
-          THTensor *gradInput,
-          THTensor *weight,
-          THIndex_t nOutputPlane);
-TH_API void THNN_(SPELU_accGradParameters)(
-          THNNState *state,
-          THTensor *input,
-          THTensor *gradOutput,
-          THTensor *gradInput,
-          THTensor *weight,
-          THTensor *gradWeight,
-          THTensor *gradWeightBuf,
-          THTensor *gradWeightBuf2,
-          THIndex_t nOutputPlane,
-          real scale);
-
 TH_API void THNN_(PReLU_updateOutput)(
           THNNState *state,
           THTensor *input,
@@ -313,6 +300,31 @@ TH_API void THNN_(PReLU_updateGradInput)(
           THTensor *weight,
           THIndex_t nOutputPlane);
 TH_API void THNN_(PReLU_accGradParameters)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *gradOutput,
+          THTensor *gradInput,
+          THTensor *weight,
+          THTensor *gradWeight,
+          THTensor *gradWeightBuf,
+          THTensor *gradWeightBuf2,
+          THIndex_t nOutputPlane,
+          real scale);
+
+TH_API void THNN_(SPELU_updateOutput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *output,
+          THTensor *weight,
+          THIndex_t nOutputPlane);
+TH_API void THNN_(SPELU_updateGradInput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *gradOutput,
+          THTensor *gradInput,
+          THTensor *weight,
+          THIndex_t nOutputPlane);
+TH_API void THNN_(SPELU_accGradParameters)(
           THNNState *state,
           THTensor *input,
           THTensor *gradOutput,
@@ -599,6 +611,44 @@ TH_API void THNN_(TemporalSubSampling_accGradParameters)(
           THTensor *gradWeight,
           THTensor *gradBias,
           int kW, int dW,
+          real scale);
+
+TH_API void THNN_(TemporalRowConvolution_updateOutput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *output,
+          THTensor *weight,
+          THTensor *bias,
+          THTensor *finput,
+          THTensor *fgradInput,
+          int kW,
+          int dW,
+          int padW,
+          bool featFirst);
+TH_API void THNN_(TemporalRowConvolution_updateGradInput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *gradOutput,
+          THTensor *gradInput,
+          THTensor *weight,
+          THTensor *finput,
+          THTensor *fgradInput,
+          int kW,
+          int dW,
+          int padW,
+          bool featFirst);
+TH_API void THNN_(TemporalRowConvolution_accGradParameters)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *gradOutput,
+          THTensor *gradWeight,
+          THTensor *gradBias,
+          THTensor *finput,
+          THTensor *fgradInput,
+          int kW,
+          int dW,
+          int padW,
+          bool featFirst,
           real scale);
 
 TH_API void THNN_(BatchNormalization_updateOutput)(
@@ -1047,7 +1097,7 @@ TH_API void THNN_(VolumetricConvolution_updateOutput)(
           THTensor *input,
           THTensor *output,
           THTensor *weight,
-          THTensor *bias,
+          THTensor *bias,           // [OPTIONAL]
           THTensor *finput,
           THTensor *fgradInput,
           int dT, int dW, int dH,
@@ -1066,7 +1116,7 @@ TH_API void THNN_(VolumetricConvolution_accGradParameters)(
           THTensor *input,
           THTensor *gradOutput,
           THTensor *gradWeight,
-          THTensor *gradBias,
+          THTensor *gradBias,       // [OPTIONAL]
           THTensor *finput,
           THTensor *fgradInput,
           int dT, int dW, int dH,
@@ -1078,7 +1128,7 @@ TH_API void THNN_(VolumetricConvolutionMM_updateOutput)(
           THTensor *input,
           THTensor *output,
           THTensor *weight,
-          THTensor *bias,
+          THTensor *bias,           // [OPTIONAL]
           THTensor *finput,
           int kT, int kW, int kH,
           int dT, int dW, int dH,
@@ -1099,8 +1149,11 @@ TH_API void THNN_(VolumetricConvolutionMM_accGradParameters)(
           THTensor *input,
           THTensor *gradOutput,
           THTensor *gradWeight,
-          THTensor *gradBias,
+          THTensor *gradBias,       // [OPTIONAL]
           THTensor *finput,
+          int kT, int kW, int kH,
+          int dT, int dW, int dH,
+          int pT, int pW, int pH,
           real scale);
 
 TH_API void THNN_(VolumetricFullConvolution_updateOutput)(
@@ -1108,7 +1161,7 @@ TH_API void THNN_(VolumetricFullConvolution_updateOutput)(
           THTensor *input,          // 4D or 5D (batch) tensor
           THTensor *output,         // [OUT] volumetric convolution output
           THTensor *weight,         // weight tensor (nInputPlane x nOutputPlane x kT x kH x kW)
-          THTensor *bias,           // gradBias tensor (nOutputPlane)
+          THTensor *bias,           // [OPTIONAL] gradBias tensor (nOutputPlane)
           THTensor *finput,         // [OUT] internal columns buffer
           THTensor *fgradInput,     // [OUT] internal ones buffer
           int dT, int dW, int dH,   // stride of the convolution
@@ -1130,7 +1183,7 @@ TH_API void THNN_(VolumetricFullConvolution_accGradParameters)(
           THTensor *input,          // 4D or 5D (batch) tensor
           THTensor *gradOutput,     // gradient w.r.t. output
           THTensor *gradWeight,     // gradWeight tensor (nInputPlane x nOutputPlane x kT x kH x kW)
-          THTensor *gradBias,       // gradBias tensor (nOutputPlane)
+          THTensor *gradBias,       // [OPTIONAL] gradBias tensor (nOutputPlane)
           THTensor *finput,         // internal columns buffer
           THTensor *fgradInput,     // internal ones buffer
           int dT, int dW, int dH,   // stride
@@ -1143,7 +1196,7 @@ TH_API void THNN_(VolumetricDilatedConvolution_updateOutput)(
           THTensor *input,
           THTensor *output,
           THTensor *weight,
-          THTensor *bias,
+          THTensor *bias,           // [OPTIONAL]
           THTensor *columns,
           THTensor *ones,
           int kT, int kW, int kH,
@@ -1168,7 +1221,7 @@ TH_API void THNN_(VolumetricDilatedConvolution_accGradParameters)(
           THTensor *input,
           THTensor *gradOutput,
           THTensor *gradWeight,
-          THTensor *gradBias,
+          THTensor *gradBias,       // [OPTIONAL]
           THTensor *columns,
           THTensor *ones,
           int kT, int kW, int kH,
@@ -1192,8 +1245,10 @@ TH_API void THNN_(VolumetricMaxPooling_updateGradInput)(
           THTensor *gradOutput,
           THTensor *gradInput,
           THIndexTensor *indices,
+          int kT, int kW, int kH,
           int dT, int dW, int dH,
-          int pT, int pW, int pH);
+          int pT, int pW, int pH,
+          bool ceilMode);
 
 TH_API void THNN_(VolumetricDilatedMaxPooling_updateOutput)(
           THNNState *state,
@@ -1211,9 +1266,11 @@ TH_API void THNN_(VolumetricDilatedMaxPooling_updateGradInput)(
           THTensor *gradOutput,
           THTensor *gradInput,
           THIndexTensor *indices,
+          int kT, int kW, int kH,
           int dT, int dW, int dH,
           int pT, int pW, int pH,
-          int dilationT, int dilationW, int dilationH);
+          int dilationT, int dilationW, int dilationH,
+          bool ceilMode);
 
 TH_API void THNN_(VolumetricMaxUnpooling_updateOutput)(
           THNNState *state,

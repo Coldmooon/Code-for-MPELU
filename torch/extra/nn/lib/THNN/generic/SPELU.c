@@ -16,7 +16,7 @@ void THNN_(SPELU_updateOutput)(
     // handle shared parameter case
     real w = *THTensor_(data)(weight);
     TH_TENSOR_APPLY2(real, output, real, input,
-      *output_data = (*input_data > 0) ? *input_data : w * (exp(*input_data) - 1);
+      *output_data = (*input_data > 0) ? *input_data : w*( exp(*input_data) - 1);
     );
   }
   else

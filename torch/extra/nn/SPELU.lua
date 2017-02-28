@@ -1,11 +1,11 @@
 local SPELU, parent = torch.class('nn.SPELU','nn.Module')
 
-function SPELU:__init(alpha, nOutputPlane)
+function SPELU:__init(beta, nOutputPlane)
    parent.__init(self)
    -- if no argument provided, use shared model (weight is scalar)
    self.nOutputPlane = nOutputPlane or 0
-   local a = alpha or 1
-   self.weight = torch.Tensor(nOutputPlane or 1):fill(a)
+   local b = beta or 0.25
+   self.weight = torch.Tensor(nOutputPlane or 1):fill(b)
    self.gradWeight = torch.Tensor(nOutputPlane or 1)
 end
 
