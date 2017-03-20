@@ -18,7 +18,6 @@ MPELU nopre bottleneck architecture:
 MPELU is initialized with alpha = 0.25 or 1 and beta = 1. The learning rate multipliers of alpha and beta are 5. The weight decay multipliers of alpha and beta are 5 or 10. The results are reported as best(mean ± std).
 
 MPELU nopre ResNet | depth | #params | CIFAR-10 | CIFAR-100
-
 -------|:--------:|:--------:|:--------:|:--------:|
 alpha = 1; beta = 1 | 164 | 1.696M | 4.58 (4.67 ± 0.06) | 21.35 (21.78 ± 0.33)
 alpha = 1; beta = 1 | 1001 | 10.28M | 3.63 (3.78 ± 0.09) | 18.96 (19.08 ± 0.16)
