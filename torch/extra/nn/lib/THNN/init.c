@@ -98,6 +98,9 @@
 #include "generic/LeakyReLU.c"
 #include "THGenerateFloatTypes.h"
 
+#include "generic/FusedRNNKernel.c"
+#include "THGenerateFloatTypes.h"
+
 #include "generic/LogSigmoid.c"
 #include "THGenerateFloatTypes.h"
 
@@ -128,9 +131,6 @@
 #include "generic/PReLU.c"
 #include "THGenerateFloatTypes.h"
 
-#include "generic/SPELU.c"
-#include "THGenerateFloatTypes.h"
-
 #include "generic/RReLU.c"
 #include "THGenerateFloatTypes.h"
 
@@ -150,6 +150,9 @@
 #include "THGenerateFloatTypes.h"
 
 #include "generic/SparseLinear.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/IndexLinear.c"
 #include "THGenerateFloatTypes.h"
 
 #include "generic/Sqrt.c"
@@ -188,6 +191,9 @@
 #include "generic/SpatialConvolutionMM.c"
 #include "THGenerateFloatTypes.h"
 
+#include "generic/SpatialDepthWiseConvolution.c"
+#include "THGenerateFloatTypes.h"
+
 #include "generic/SpatialConvolutionLocal.c"
 #include "THGenerateFloatTypes.h"
 
@@ -201,6 +207,9 @@
 #include "THGenerateFloatTypes.h"
 
 #include "generic/SpatialAdaptiveMaxPooling.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/SpatialAdaptiveAveragePooling.c"
 #include "THGenerateFloatTypes.h"
 
 #include "generic/SpatialAveragePooling.c"
@@ -227,6 +236,9 @@
 #include "generic/SpatialUpSamplingBilinear.c"
 #include "THGenerateFloatTypes.h"
 
+#include "generic/SpatialGridSamplerBilinear.c"
+#include "THGenerateFloatTypes.h"
+
 #include "generic/VolumetricAveragePooling.c"
 #include "THGenerateFloatTypes.h"
 
@@ -248,6 +260,9 @@
 #include "generic/VolumetricDilatedMaxPooling.c"
 #include "THGenerateFloatTypes.h"
 
+#include "generic/VolumetricFractionalMaxPooling.c"
+#include "THGenerateFloatTypes.h"
+
 #include "generic/VolumetricMaxUnpooling.c"
 #include "THGenerateFloatTypes.h"
 
@@ -258,4 +273,13 @@
 #include "THGenerateFloatTypes.h"
 
 #include "generic/VolumetricReplicationPadding.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/VolumetricUpSamplingNearest.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/VolumetricUpSamplingTrilinear.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/SPELU.c"
 #include "THGenerateFloatTypes.h"

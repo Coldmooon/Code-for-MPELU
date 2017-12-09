@@ -11,6 +11,7 @@ void THNN_(SPELU_updateOutput)(
 {
   THCTensor_(resizeAs)(state, output, input);
 
+  weight = THCTensor_(newContiguous)(state, weight);
   real *w = THCTensor_(data)(state, weight);
 
   if (nOutputPlane == 0)
@@ -23,11 +24,13 @@ void THNN_(SPELU_updateOutput)(
     input = THCTensor_(newContiguous)(state, input);
 
     int n = THCTensor_(nElement)(state, input);
+    if (input->size[ndim > 1] != nOutputPlane)
+      THError("Wrong number of input planes. Expected %d but got %d.", nOutputPlane, input->size[ndim > 1]);
+
     int mapSize = 1;
-    if (ndim == 3)
-      mapSize = (input->size[1] * input->size[2]);
-    else if (ndim == 4)
-      mapSize = (input->size[2] * input->size[3]);
+    for (int d = 2; d < ndim; d++) {
+      mapSize *= input->size[d];
+    }
     int nElemsPerSample = nOutputPlane * mapSize;
     speluForward<<<GET_BLOCKS(n), CUDA_NUM_THREADS, 0, THCState_getCurrentStream(state)>>>(
       THCTensor_(data)(state, output),
@@ -38,6 +41,8 @@ void THNN_(SPELU_updateOutput)(
     THCudaCheck(cudaGetLastError());
     THCTensor_(free)(state, input);
   }
+
+  THCTensor_(free)(state, weight);
 }
 
 void THNN_(SPELU_updateGradInput)(
@@ -51,6 +56,7 @@ void THNN_(SPELU_updateGradInput)(
   THCUNN_check_nElement(state, input, gradOutput);
   THCTensor_(resizeAs)(state, gradInput, input);
 
+  weight = THCTensor_(newContiguous)(state, weight);
   real *w = THCTensor_(data)(state, weight);
   if (nOutputPlane == 0)
   {
@@ -63,11 +69,13 @@ void THNN_(SPELU_updateGradInput)(
     gradOutput = THCTensor_(newContiguous)(state, gradOutput);
 
     int n = THCTensor_(nElement)(state, input);
+    if (input->size[ndim > 1] != nOutputPlane)
+      THError("Wrong number of input planes. Expected %d but got %d.", nOutputPlane, input->size[ndim > 1]);
+
     int mapSize = 1;
-    if (ndim == 3)
-      mapSize = (input->size[1] * input->size[2]);
-    else if (ndim == 4)
-      mapSize = (input->size[2] * input->size[3]);
+    for (int d = 2; d < ndim; d++) {
+      mapSize *= input->size[d];
+    }
     int nElemsPerSample = nOutputPlane * mapSize;
     speluBackward<<<GET_BLOCKS(n), CUDA_NUM_THREADS, 0, THCState_getCurrentStream(state)>>>(
       THCTensor_(data)(state, gradInput),
@@ -80,6 +88,7 @@ void THNN_(SPELU_updateGradInput)(
     THCTensor_(free)(state, input);
     THCTensor_(free)(state, gradOutput);
   }
+  THCTensor_(free)(state, weight);
 }
 
 void THNN_(SPELU_accGradParameters)(
@@ -92,8 +101,9 @@ void THNN_(SPELU_accGradParameters)(
            THCTensor *gradWeightBuf,
            THCTensor *gradWeightBuf2,
            long nOutputPlane,
-           real scale)
+           accreal scale_)
 {
+  real scale = ScalarConvert<accreal, real>::to(scale_);
   THCUNN_check_nElement(state, input, gradOutput);
   // use grad input for temporary storage, then call updateGradInput again
 
@@ -125,24 +135,20 @@ void THNN_(SPELU_accGradParameters)(
 
       if (ndim == 2)
       {
-        THCTensor_(sum)(state, gradWeightBuf, gradInput, 0);
+        THCTensor_(sum)(state, gradWeightBuf, gradInput, 0, 1);
         THCTensor_(cadd)(state, gradWeight, gradWeight, scale, gradWeightBuf);
       }
-      else if (ndim == 3)
+      else
       {
         THCTensor *buffer = THCTensor_(newContiguous)(state, gradInput);
-        THCTensor_(resize2d)(state, buffer, nOutputPlane, input->size[1] * input->size[2]);
-        THCTensor_(sum)(state, gradWeightBuf, buffer, 1);
-        THCTensor_(cadd)(state, gradWeight, gradWeight, scale, gradWeightBuf);
-        THCTensor_(free)(state, buffer);
-      }
-      else if (ndim == 4)
-      {
-        THCTensor *buffer = THCTensor_(newContiguous)(state, gradInput);
-        THCTensor_(resize3d)(state, buffer, input->size[0], nOutputPlane, input->size[2] * input->size[3]);
+        long size3 = 1;
+        for (int d = 2; d < ndim; d++) {
+          size3 *= input->size[d];
+        }
+        THCTensor_(resize3d)(state, buffer, input->size[0], nOutputPlane, size3);
         THCTensor_(resize2d)(state, sumbuf, input->size[0], nOutputPlane);
-        THCTensor_(sum)(state, sumbuf, buffer, 2);
-        THCTensor_(sum)(state, gradWeightBuf, sumbuf, 0);
+        THCTensor_(sum)(state, sumbuf, buffer, 2, 1);
+        THCTensor_(sum)(state, gradWeightBuf, sumbuf, 0, 1);
         THCTensor_(cadd)(state, gradWeight, gradWeight, scale, gradWeightBuf);
         THCTensor_(free)(state, buffer);
       }
