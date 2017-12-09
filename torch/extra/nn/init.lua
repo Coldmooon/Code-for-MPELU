@@ -217,11 +217,6 @@ require('nn.SparseJacobian')
 require('nn.hessian')
 require('nn.test')
 
-require('nn.RSampling')
-require('nn.AutoPadding')
-require('nn.SwitcherTable')
-require('nn.Diffraction')
-require('nn.RandomCropping')
 require('nn.SPELU')
 
 return nn
