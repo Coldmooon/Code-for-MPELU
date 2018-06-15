@@ -36,13 +36,13 @@ th main.lua -netType mpelu-preactivation-nopre -depth 1001 -batchSize 64 -nGPU 2
 ```
 
 ## Installation
-We provide [Caffe](https://github.com/Coldmooon/caffe) and [Torch](http://torch.ch/) implementations.
+We provide [Caffe](https://github.com/BVLC/caffe) and [Torch](http://torch.ch/) implementations.
 
 ### Caffe:
 
-1) Download the latest caffe from [https://github.com/Coldmooon/caffe](https://github.com/Coldmooon/caffe)
+1) Download the latest `caffe` from [https://github.com/BVLC/caffe](https://github.com/BVLC/caffe)
 
-2) Move `caffe/*` of this repo to the caffe directory you just downloaded and follow the [instruction](http://caffe.berkeleyvision.org/installation.html) to compile.
+2) Move `caffe/*` of this repo to the `caffe` directory and follow the [instruction](http://caffe.berkeleyvision.org/installation.html) to compile.
 
 ### Torch:
 
@@ -65,8 +65,6 @@ luarocks make rocks/nn-scm-1.rockspec
 cd torch/extra/cunn/
 luarocks make rocks/cunn-scm-1.rockspec
 ```
-To use `MPELU`, just include `/path/to/mpelu.lua` in your code.
-
 
 ## Usage
 ### Caffe:
