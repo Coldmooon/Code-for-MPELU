@@ -93,8 +93,11 @@ require '/path/to/mpelu'
 model = nn.Sequential()
 model:add(MPELU(alpha, beta, alpha_lr_mult, beta_lr_mult, alpha_wd_mult, beta_wd_mult, num_of_channels))
 ```
+
 `alpha_lr_mult`, `beta_lr_mult`: the multiplier of learning rate for `alpha` and `beta`.
+
 `alpha_wd_mult`, `beta_wd_mult`: the multiplier of weight decay for `alpha` and `beta`.
+
 `num_of_channels`: Similar to PReLU, if `num_of_channels` is not given, `channel shared` is used.
 
 **Taylor filler**: Please check our examples in `mpelu_nopre_resnet`.
