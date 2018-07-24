@@ -405,6 +405,39 @@ TH_API void THNN_(SPELU_accGradParameters)(
                   long nOutputPlane,
                   accreal scale);
 
+TH_API void THNN_(MPELU_updateOutput)(
+                  THCState *state,
+                  THCTensor *input,
+                  THCTensor *output,
+                  THCTensor *weight,
+                  THCTensor *bias,
+                  long nOutputPlane);
+
+TH_API void THNN_(MPELU_updateGradInput)(
+                  THCState *state,
+                  THCTensor *input,
+                  THCTensor *gradOutput,
+                  THCTensor *gradInput,
+                  THCTensor *weight,
+                  THCTensor *bias,
+                  long nOutputPlane);
+
+TH_API void THNN_(MPELU_accGradParameters)(
+                  THCState *state,
+                  THCTensor *input,
+                  THCTensor *gradOutput,
+                  THCTensor *gradInput,
+                  THCTensor *weight,
+                  THCTensor *gradWeight,
+                  THCTensor *gradWeightBuf,
+                  THCTensor *gradWeightBuf2,
+                  THCTensor *bias,
+                  THCTensor *gradBias,
+                  THCTensor *gradBiasBuf,
+                  THCTensor *gradBiasBuf2,
+                  long nOutputPlane,
+                  accreal scale);
+
 TH_API void THNN_(SmoothL1Criterion_updateOutput)(
                   THCState *state,
                   THCTensor *input,

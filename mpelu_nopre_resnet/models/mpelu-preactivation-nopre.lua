@@ -6,7 +6,7 @@
 
 local nn = require 'nn'
 require 'cunn'
-require './mpelu/mpelu'
+require 'nnlr'
 
 local Convolution = cudnn.SpatialConvolution
 local Avg = cudnn.SpatialAveragePooling
@@ -14,6 +14,17 @@ local Max = nn.SpatialMaxPooling
 local SBatchNorm = nn.SpatialBatchNormalization
 local alpha = 0.25
 local beta  = 1
+local lr_a = 5
+local wd_a = 10
+local lr_b = 5
+local wd_b = 10
+
+function MPELU(channels)
+    local MPELU = nn.MPELU(alpha, beta, channels):learningRate('weight', lr_a):weightDecay('weight', wd_a)
+                                                 :learningRate('bias', lr_b):weightDecay('bias', wd_b)
+
+    return MPELU
+end
 
 local function createModel(opt)
    local depth = opt.depth
@@ -27,11 +38,11 @@ local function createModel(opt)
          -- conv1x1
          convs:add(Convolution(nInputPlane,nBottleneckPlane,1,1,stride,stride,0,0))
          convs:add(SBatchNorm(nBottleneckPlane))
-         convs:add(MPELU(alpha, beta, 5, 5, 10, 10, nBottleneckPlane))
+         convs:add(MPELU(nBottleneckPlane))
          -- conv3x3
          convs:add(Convolution(nBottleneckPlane,nBottleneckPlane,3,3,1,1,1,1))
          convs:add(SBatchNorm(nBottleneckPlane))
-         convs:add(MPELU(alpha, beta, 5, 5, 10, 10, nBottleneckPlane))
+         convs:add(MPELU(nBottleneckPlane))
          -- conv1x1
          convs:add(Convolution(nBottleneckPlane,nOutputPlane,1,1,1,1,0,0))
         
@@ -48,11 +59,11 @@ local function createModel(opt)
          -- conv1x1
          convs:add(Convolution(nInputPlane,nBottleneckPlane,1,1,stride,stride,0,0))
          convs:add(SBatchNorm(nBottleneckPlane))
-         convs:add(MPELU(alpha, beta, 5, 5, 10, 10, nBottleneckPlane))
+         convs:add(MPELU(nBottleneckPlane))
          -- conv3x3
          convs:add(Convolution(nBottleneckPlane,nBottleneckPlane,3,3,1,1,1,1))
          convs:add(SBatchNorm(nBottleneckPlane))
-         convs:add(MPELU(alpha, beta, 5, 5, 10, 10, nBottleneckPlane))
+         convs:add(MPELU(nBottleneckPlane))
          -- conv1x1
          convs:add(Convolution(nBottleneckPlane,nOutputPlane,1,1,1,1,0,0))
         
@@ -90,12 +101,12 @@ local function createModel(opt)
 
       model:add(Convolution(3,nStages[1],3,3,1,1,1,1))
       model:add(SBatchNorm(nStages[1]))
-      model:add(MPELU(alpha, beta, 5, 5, 10, 10, nStages[1]))
+      model:add(MPELU(nStages[1]))
       model:add(layer(bottleneck, nStages[1], nStages[2], n, 1)) -- Stage 1 (spatial size: 32x32)
       model:add(layer(bottleneck, nStages[2], nStages[3], n, 2)) -- Stage 2 (spatial size: 16x16)
       model:add(layer(bottleneck, nStages[3], nStages[4], n, 2)) -- Stage 3 (spatial size: 8x8)
       model:add(SBatchNorm(nStages[4]))
-      model:add(MPELU(alpha, beta, 5, 5, 10, 10, nStages[4]))
+      model:add(MPELU(nStages[4]))
       model:add(Avg(8, 8, 1, 1))
       model:add(nn.View(nStages[4]):setNumInputDims(3))
       model:add(nn.Linear(nStages[4], 10))
@@ -110,12 +121,12 @@ local function createModel(opt)
 
       model:add(Convolution(3,nStages[1],3,3,1,1,1,1))
       model:add(SBatchNorm(nStages[1]))
-      model:add(MPELU(alpha, beta, 5, 5, 10, 10, nStages[1]))
+      model:add(MPELU(nStages[1]))
       model:add(layer(bottleneck, nStages[1], nStages[2], n, 1)) -- Stage 1 (spatial size: 32x32)
       model:add(layer(bottleneck, nStages[2], nStages[3], n, 2)) -- Stage 2 (spatial size: 16x16)
       model:add(layer(bottleneck, nStages[3], nStages[4], n, 2)) -- Stage 3 (spatial size: 8x8)
       model:add(SBatchNorm(nStages[4]))
-      model:add(MPELU(alpha, beta, 5, 5, 10, 10, nStages[4]))
+      model:add(MPELU(nStages[4]))
       model:add(Avg(8, 8, 1, 1))
       model:add(nn.View(nStages[4]):setNumInputDims(3))
       model:add(nn.Linear(nStages[4], 100))

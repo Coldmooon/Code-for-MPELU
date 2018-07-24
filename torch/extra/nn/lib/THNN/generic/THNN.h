@@ -375,6 +375,37 @@ TH_API void THNN_(SPELU_accGradParameters)(
           THIndex_t nOutputPlane,
           accreal scale);
 
+TH_API void THNN_(MPELU_updateOutput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *output,
+          THTensor *weight,
+          THTensor *bias,
+          THIndex_t nOutputPlane);
+TH_API void THNN_(MPELU_updateGradInput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *gradOutput,
+          THTensor *gradInput,
+          THTensor *weight,
+          THTensor *bias,
+          THIndex_t nOutputPlane);
+TH_API void THNN_(MPELU_accGradParameters)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *gradOutput,
+          THTensor *gradInput,
+          THTensor *weight,
+          THTensor *gradWeight,
+          THTensor *gradWeightBuf,
+          THTensor *gradWeightBuf2,
+          THTensor *bias,
+          THTensor *gradBias,
+          THTensor *gradBiasBuf,
+          THTensor *gradBiasBuf2,
+          THIndex_t nOutputPlane,
+          accreal scale);
+
 TH_API void THNN_(Linear_updateOutput)(
           THNNState *state,
           THTensor *input,

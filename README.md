@@ -28,7 +28,7 @@ To replicate our results,
 
 1. Install [fb.resnet.troch](https://github.com/facebook/fb.resnet.torch)
 2. Follow our instructions to install MPELU in torch.
-2. Copy files in `mpelu_nopre_resnet` to `fb.resnet.troch` and overwrite the original files.
+2. Copy files in `mpelu_nopre_resnet` to `fb.resnet.torch` and overwrite the original files.
 3. Run the following command to train a 1001-layer MPELU nopre ResNet
 
 ```
@@ -48,16 +48,9 @@ We provide [Caffe](https://github.com/BVLC/caffe) and [Torch](http://torch.ch/) 
 
 1) Update `torch` to the latest version. This is necessary because of [#346](https://github.com/torch/cunn/pull/346).
 
-2) install nnlr.
+2) Move `torch/extra` in this repo to the official torch directory and overwrite the corresponding files.
 
-```
-$ luarocks install nnlr
-```
-
-3) Move `torch/extra` in this repo to the official torch directory and overwrite the corresponding files.
-
-
-4) For convenience, MPELU of torch version is implemented as the composition of existing activation functions. First, compile the new layer `SPELU`:
+3) Run the following command to compile new layers.
 
 ```
 cd torch/extra/nn/
@@ -85,20 +78,31 @@ weight_filler {
 ```
 See the examples for details.
 
+
 ### Torch
 
+I implemented two activation functions, `SPELU` and `MPELU`, where `SPELU` is a trimmed version of MPELU and can also be seen as a learnable `ELU`.
+
 ```
-require '/path/to/mpelu'
-
-model = nn.Sequential()
-model:add(MPELU(alpha, beta, alpha_lr_mult, beta_lr_mult, alpha_wd_mult, beta_wd_mult, num_of_channels))
+nn.SPELU(alpha=1, nOutputPlane=0)
+nn.MPELU(alpha=1, beta=1, nOutputPlane=0)
 ```
 
-`alpha_lr_mult`, `beta_lr_mult`: the multiplier of learning rate for `alpha` and `beta`.
+- When `nOutputPlane = 0`, the `channel-shared` version will be used. 
+- When `nOutputPlane` is set to the number of feature maps, the `channel-wise` version will be used.
 
-`alpha_wd_mult`, `beta_wd_mult`: the multiplier of weight decay for `alpha` and `beta`.
+To set the multipliers of weight decay for `MPELU`, use the `nnlr` package.
 
-`num_of_channels`: Similar to PReLU, if `num_of_channels` is not given, `channel shared` is used.
+```
+$ luarocks install nnlr
+```
+
+```
+require 'nnlr'
+
+nn.MPELU(alpha, beta, channels):learningRate('weight', lr_alpha):weightDecay('weight', wd_alpha)
+                               :learningRate('bias', lr_beta):weightDecay('bias', wd_beta)
+```
 
 **Taylor filler**: Please check our examples in `mpelu_nopre_resnet`.
 

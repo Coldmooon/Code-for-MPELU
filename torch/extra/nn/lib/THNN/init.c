@@ -283,3 +283,6 @@
 
 #include "generic/SPELU.c"
 #include "THGenerateFloatTypes.h"
+
+#include "generic/MPELU.c"
+#include "THGenerateFloatTypes.h"

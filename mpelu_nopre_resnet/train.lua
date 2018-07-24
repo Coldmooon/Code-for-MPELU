@@ -194,6 +194,9 @@ function Trainer:learningRate(epoch)
    -- for k,v in pairs(self.model:findModules('nn.PReLU')) do
    --    v.__weightLearningRate = lr_mult
    -- end
+   for k,v in pairs(self.model:findModules('nn.MPELU')) do
+      v.__weightLearningRate = lr_mult
+   end
 
    return self.opt.LR * math.pow(0.1, decay)
 end

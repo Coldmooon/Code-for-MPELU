@@ -218,5 +218,6 @@ require('nn.hessian')
 require('nn.test')
 
 require('nn.SPELU')
+require('nn.MPELU')
 
 return nn
