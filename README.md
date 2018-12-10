@@ -3,9 +3,23 @@ Code for Improving Deep Neural Network with Multiple Parametric Exponential Line
 
 The main contributions are:
 
-- A generalization of ELU which encompasses ReLU, LReLU and PReLU.
-- A weight initialization, named taylor initialization, for very deep networks using ELU/MPELU. If used with ReLU neworks, it reduces to MSRA filler.
-- A deep MPELU residual architecture that is more effective than the original (Pre-)ResNet one.
+- A new activation function, MPELU, which is a unified form of ReLU, PReLU and ELU.
+- A corresponding method of weight initialization for both ReLU-like and ELU-like networks. If used with ReLU neworks, it reduces to MSRA initialization.
+- A no-pre ResNet architecture that is more effective than the original Pre-/ResNet.
+
+#### Citation
+```
+@article{LI201811,
+		title = "Improving deep neural network with Multiple Parametric Exponential Linear Units",
+		journal = "Neurocomputing",
+		volume = "301",
+		pages = "11 - 24",
+		year = "2018",
+		issn = "0925-2312",
+		doi = "https://doi.org/10.1016/j.neucom.2018.01.084",
+		author = "Yang Li and Chunxiao Fan and Yong Li and Qiong Wu and Yue Ming"
+}
+```
 
 ## Deep MPELU residual architecture
 
@@ -105,11 +119,3 @@ nn.MPELU(alpha, beta, channels):learningRate('weight', lr_alpha):weightDecay('we
 ```
 
 **Taylor filler**: Please check our examples in `mpelu_nopre_resnet`.
-
-
-
-
-
-
-
-
