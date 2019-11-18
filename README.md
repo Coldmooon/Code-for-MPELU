@@ -4,7 +4,7 @@ Code for Improving Deep Neural Network with Multiple Parametric Exponential Line
 The main contributions are:
 
 - A new activation function, MPELU, which is a unified form of ReLU, PReLU and ELU.
-- A corresponding method of weight initialization for both ReLU-like and ELU-like networks. If used with ReLU neworks, it reduces to MSRA initialization.
+- A weight initialization method for both ReLU-like and ELU-like networks. If used with the ReLU nework, it reduces to Kaiming initialization.
 - A no-pre ResNet architecture that is more effective than the original Pre-/ResNet.
 
 #### Citation
