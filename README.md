@@ -50,7 +50,15 @@ th main.lua -netType mpelu-preactivation-nopre -depth 1001 -batchSize 64 -nGPU 2
 ```
 
 ## Installation
-We provide [Caffe](https://github.com/BVLC/caffe) and [Torch](http://torch.ch/) implementations.
+We provide [PyTorch](https://pytorch.org/), [Caffe](https://github.com/BVLC/caffe) and [Torch7](http://torch.ch/)(deprecated) implementations.
+
+### PyTorch
+
+The pytorch version is implemented using CUDA for fast computation. The code has been tested in Ubuntu 20.04 with CUDA 11.6. The installation is very easy.
+
+1) `cd ./pytorch`
+
+2) `pip install .`
 
 ### Caffe:
 
@@ -74,6 +82,39 @@ luarocks make rocks/cunn-scm-1.rockspec
 ```
 
 ## Usage
+### PyTorch
+
+To use the MPELU module in a neural network, you can import it from the mpelu module and then use it as a regular PyTorch module in your network definition.
+
+For example, let's say you have defined the MPELU module in a file called mpelu.py. To use it in a neural network, you can do the following:
+
+```
+import torch
+from mpelu import MPELU
+
+class MyNet(torch.nn.Module):
+    def __init__(self):
+        super(MyNet, self).__init__()
+        self.mpelu = MPELU()
+
+        # Add more layers to the network
+        self.conv1 = torch.nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1)
+        self.conv2 = torch.nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1)
+        self.fc1 = torch.nn.Linear(32 * 8 * 8, 64)
+        self.fc2 = torch.nn.Linear(64, 10)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.mpelu(x)
+        x = self.conv2(x)
+        x = self.mpelu(x)
+        x = x.view(-1, 32 * 8 * 8)
+        x = self.fc1(x)
+        x = self.mpelu(x)
+        x = self.fc2(x)
+        return x
+```
+
 ### Caffe:
 
 **MPELU**:
