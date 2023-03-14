@@ -5,7 +5,7 @@ The main contributions are:
 
 - A new activation function, MPELU, which is a unified form of ReLU, PReLU and ELU.
 - A weight initialization method for both ReLU-like and ELU-like networks. If used with the ReLU nework, it reduces to Kaiming initialization.
-- A no-pre ResNet architecture that is more effective than the original Pre-/ResNet.
+- A network architecture that is more effective than the original Pre-/ResNet.
 
 #### Citation
 ```
@@ -27,7 +27,7 @@ MPELU nopre bottleneck architecture:
 
 ![img](torch/models/MPELU-NoPre-ResNet.jpg)
 
-## Test error on CIFAR-10/100
+## Experiments on CIFAR-10/100
 
 MPELU is initialized with alpha = 0.25 or 1 and beta = 1. The learning rate multipliers of alpha and beta are 5. The weight decay multipliers of alpha and beta are 5 or 10. The results are reported as best(mean ± std).
 
@@ -38,7 +38,7 @@ alpha = 1; beta = 1 | 1001 | 10.28M | 3.63 (3.78 ± 0.09) | 18.96 (19.08 ± 0.16
 alpha = 0.25; beta = 1 | 164 | 1.696M | 4.43 (4.53 ± 0.12) | 21.69 (21.88 ± 0.19)
 alpha = 0.25; beta = 1 | 1001 | 10.28M | **3.57 (3.71 ± 0.11)** | **18.81 (18.98 ± 0.19)**
 
-To replicate our results,
+The experimental results in paper were conducted in torch7. But we also provide `pytorch` and `caffe` implementations. If you want to use the torch7 version to replicate our results, please follow the steps below: 
 
 1. Install [fb.resnet.troch](https://github.com/facebook/fb.resnet.torch)
 2. Follow our instructions to install MPELU in torch.
@@ -50,11 +50,11 @@ th main.lua -netType mpelu-preactivation-nopre -depth 1001 -batchSize 64 -nGPU 2
 ```
 
 ## Installation
-We provide [PyTorch](https://pytorch.org/), [Caffe](https://github.com/BVLC/caffe) and [Torch7](http://torch.ch/)(deprecated) implementations.
+We now provide [PyTorch](https://pytorch.org/), [Caffe](https://github.com/BVLC/caffe) and [Torch7](http://torch.ch/)(deprecated) implementations.
 
 ### PyTorch
 
-The pytorch version is implemented using CUDA for fast computation. The code has been tested in Ubuntu 20.04 with CUDA 11.6. The installation is very easy.
+The pytorch version is implemented using CUDA for fast computation. The code has been tested in Ubuntu 20.04 with CUDA 11.6. The implementation is isolated from your PyTorch library and does not modify any other Python packages installed on your system. It can be installed and uninstalled independently using the `pip` package manager, and therefore can be used alongside your original PyTorch library without interfering with its functionality. You may integrate them into your projects as needed.
 
 1) `cd ./pytorch`
 
@@ -66,7 +66,7 @@ The pytorch version is implemented using CUDA for fast computation. The code has
 
 2) Move `caffe/*` of this repo to the `caffe` directory and follow the [instruction](http://caffe.berkeleyvision.org/installation.html) to compile.
 
-### Torch:
+### Torch7:
 
 1) Update `torch` to the latest version. This is necessary because of [#346](https://github.com/torch/cunn/pull/346).
 
@@ -95,23 +95,20 @@ from mpelu import MPELU
 class MyNet(torch.nn.Module):
     def __init__(self):
         super(MyNet, self).__init__()
-        self.mpelu = MPELU()
 
-        # Add more layers to the network
         self.conv1 = torch.nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1)
+        self.mpelu1 = MPELU(16)
         self.conv2 = torch.nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1)
-        self.fc1 = torch.nn.Linear(32 * 8 * 8, 64)
-        self.fc2 = torch.nn.Linear(64, 10)
+        self.mpelu2 = MPELU(32)
+        self.fc = torch.nn.Linear(32 * 8 * 8, 10)
 
     def forward(self, x):
         x = self.conv1(x)
-        x = self.mpelu(x)
+        x = self.mpelu1(x)
         x = self.conv2(x)
-        x = self.mpelu(x)
+        x = self.mpelu2(x)
         x = x.view(-1, 32 * 8 * 8)
-        x = self.fc1(x)
-        x = self.mpelu(x)
-        x = self.fc2(x)
+        x = self.fc(x)
         return x
 ```
 
@@ -134,7 +131,7 @@ weight_filler {
 See the examples for details.
 
 
-### Torch
+### Torch7
 
 I implemented two activation functions, `SPELU` and `MPELU`, where `SPELU` is a trimmed version of MPELU and can also be seen as a learnable `ELU`.
 
