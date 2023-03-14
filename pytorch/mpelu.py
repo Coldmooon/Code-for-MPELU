@@ -4,7 +4,7 @@ import mpelu_cuda
 class MPELUFunction(torch.autograd.Function):
     @staticmethod
     def forward(ctx, input, a, b):
-        output = mpelu_cuda.mpelu_forward(a, b, input)
+        output = mpelu_cuda.mpelu_forward(input, a, b)
         ctx.save_for_backward(input, a, b)
 
         return output
@@ -16,7 +16,7 @@ class MPELUFunction(torch.autograd.Function):
         grad_input = torch.zeros_like(input)
         grad_a = torch.zeros_like(a)
         grad_b = torch.zeros_like(b)
-        mpelu_cuda.mpelu_backward(input, grad_output.contiguous(), grad_input.contiguous(), grad_a.contiguous(), grad_b.contiguous(), a, b)
+        mpelu_cuda.mpelu_backward(input, a, b, grad_output.contiguous(), grad_input.contiguous(), grad_a.contiguous(), grad_b.contiguous())
 
         return grad_input, grad_a, grad_b
 
