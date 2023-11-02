@@ -1,3 +1,7 @@
+## Updates
+- November 2, 2023: Added support for Mixed Precision
+- March 14, 2023: Added support for PyTorch (latest for pytorch 2.1.0)
+
 ## Code-for-MPELU
 Code for Improving Deep Neural Network with Multiple Parametric Exponential Linear Units, [arXiv:1606.00305](https://arxiv.org/abs/1606.00305)
 
@@ -83,6 +87,12 @@ luarocks make rocks/cunn-scm-1.rockspec
 
 ## Usage
 ### PyTorch
+
+Examples:
+```
+# install MPELU first, then
+python examples/mnist_mpelu.py
+```
 
 To use the MPELU module in a neural network, you can import it from the mpelu module and then use it as a regular PyTorch module in your network definition.
 

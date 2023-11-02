@@ -1,16 +1,20 @@
 import torch
 import mpelu_cuda
+from torch.cuda.amp import autocast, custom_fwd, custom_bwd
 
 class MPELUFunction(torch.autograd.Function):
     @staticmethod
+    @custom_fwd
     def forward(ctx, input, a, b):
-        output = mpelu_cuda.mpelu_forward(input, a, b)
-        ctx.save_for_backward(input, a, b)
+        with autocast():
+            output = mpelu_cuda.mpelu_forward(input, a, b)
+            ctx.save_for_backward(input, a, b)
 
-        return output
+            return output
 
 
     @staticmethod
+    @custom_bwd
     def backward(ctx, grad_output):
         input, a, b = ctx.saved_tensors
         grad_input = torch.zeros_like(input)
