@@ -9,11 +9,7 @@ torch::Tensor mpelu_forward(
     CHECK_INPUT(a);
     CHECK_INPUT(b);
 
-    const int channel = input.size(1);
-    const int height = input.size(2);
-    const int width = input.size(3);
-
-    return mpelu_forward_cuda(input, a, b, channel, height, width);
+    return mpelu_forward_cuda(input, a, b);
 }
 
 void mpelu_backward(

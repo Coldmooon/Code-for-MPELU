@@ -7,10 +7,7 @@
 torch::Tensor mpelu_forward_cuda(
     const torch::Tensor input,
     const torch::Tensor a,
-    const torch::Tensor b,
-    const int channel,
-    const int height,
-    const int width
+    const torch::Tensor b
 );
 
 
