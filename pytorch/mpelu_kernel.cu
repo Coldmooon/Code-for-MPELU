@@ -1,4 +1,5 @@
 #include <torch/extension.h>
+#include <ATen/cuda/Atomic.cuh>
 
 template <typename scalar_t>
 __global__ void mpelu_forward_cuda_kernel(
@@ -33,6 +34,33 @@ __global__ void mpelu_forward_cuda_kernel(
 
 };
 
+// =============== Solution 1 for atomicAdd not support for (c10::Half *, c10::Half) ===============
+// adapted from https://github.com/torch/cutorch/blob/master/lib/THC/THCAtomics.cuh
+// https://forums.developer.nvidia.com/t/atomicadd-not-overloaded-for-c10-half/204474/2
+// __device__ __forceinline__ void atomicAdd(c10::Half* address, c10::Half val) {
+//     unsigned int *address_as_ui = reinterpret_cast<unsigned int *>(reinterpret_cast<char *>(address) - (reinterpret_cast<size_t>(address) & 2));
+//     unsigned int old = *address_as_ui;
+//     unsigned int assumed;
+
+//     do {
+//         assumed = old;
+//         unsigned short hsum = reinterpret_cast<size_t>(address) & 2 ? (old >> 16) : (old & 0xffff);
+//         hsum += val;
+//         old = reinterpret_cast<size_t>(address) & 2
+//                  ? (old & 0xffff) | (hsum << 16)
+//                  : (old & 0xffff0000) | hsum;
+//         old = atomicCAS(address_as_ui, assumed, old);
+
+//     // Note: uses integer comparison to avoid hang in case of NaN (since NaN != NaN)
+//     } while (assumed != old);
+// }
+// =============== End: Solution 1 for atomicAdd not support for (c10::Half *, c10::Half) ===============
+
+// =============== Solution 2 for atomicAdd not support for (c10::Half *, c10::Half) ===============
+// https://discuss.pytorch.org/t/c10-half-float-type-support-for-atomicadd/137628/2
+// Use gpuAtomicAdd rather than atomicAdd:
+// https://github.com/pytorch/pytorch/blob/085e2f7bddc45f859fcdb786926d60d709b2daa0/aten/src/ATen/cuda/Atomic.cuh#L181-L190
+// =============== End: Solution 2 for atomicAdd not support for (c10::Half *, c10::Half) ===============
 
 template <typename scalar_t>
 __global__ void mpelu_backward_cuda_kernel(
@@ -71,8 +99,8 @@ __global__ void mpelu_backward_cuda_kernel(
             grad_inp = grad_out;
         } else {
             grad_inp = grad_out * a_val * b_val * expf(b_val * inp);
-            atomicAdd(&grad_a[c], static_cast<float>(grad_out * (expf(b_val * inp) - 1)));
-            atomicAdd(&grad_b[c], static_cast<float>(grad_out * a_val * inp * expf(b_val * inp)));
+            gpuAtomicAdd(&grad_a[c], grad_out * (expf(b_val * inp) - 1));
+            gpuAtomicAdd(&grad_b[c], grad_out * a_val * inp * expf(b_val * inp));
         }
 
         grad_input[n][c][h][w] = grad_inp;
@@ -98,7 +126,7 @@ torch::Tensor mpelu_forward_cuda(
         (input.size(3) + threadsPerBlock.x - 1) / threadsPerBlock.x,
         (input.size(2) + threadsPerBlock.y - 1) / threadsPerBlock.y);
     
-    AT_DISPATCH_FLOATING_TYPES(input.type(), "mpelu_forward_cuda", ([&] {
+    AT_DISPATCH_FLOATING_TYPES_AND_HALF(input.type(), "mpelu_forward_cuda", ([&] {
         mpelu_forward_cuda_kernel<scalar_t><<<numBlocks, threadsPerBlock>>>(
             input.packed_accessor<scalar_t, 4, torch::RestrictPtrTraits, size_t>(),
             a.packed_accessor<scalar_t, 1, torch::RestrictPtrTraits, size_t>(),
@@ -132,7 +160,7 @@ void mpelu_backward_cuda(
     const int num_threads = 1024;
     const int num_blocks = (batch_size*num_channels*height*width + num_threads - 1) / num_threads;
 
-    AT_DISPATCH_FLOATING_TYPES(grad_output.type(), "mpelu_backward_cuda", ([&] {
+    AT_DISPATCH_FLOATING_TYPES_AND_HALF(grad_output.type(), "mpelu_backward_cuda", ([&] {
         mpelu_backward_cuda_kernel<scalar_t><<<num_blocks, num_threads>>>(
             input.packed_accessor<scalar_t,4,torch::RestrictPtrTraits,size_t>(),
             a.packed_accessor<scalar_t,1,torch::RestrictPtrTraits,size_t>(),

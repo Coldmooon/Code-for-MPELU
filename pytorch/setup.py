@@ -12,7 +12,7 @@ sources = glob.glob('*.cpp')+glob.glob('*.cu')
 
 setup(
     name='mpelu_cuda',
-    version='1.0',
+    version='1.3',
     ext_modules=[
         CUDAExtension(
             name='mpelu_cuda',
