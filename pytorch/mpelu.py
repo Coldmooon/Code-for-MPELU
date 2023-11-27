@@ -7,7 +7,7 @@ class MPELUFunction(torch.autograd.Function):
     @custom_fwd
     def forward(ctx, input, alpha, beta):
         output = mpelu_cuda.mpelu_forward(input, alpha.to(input.dtype), beta.to(input.dtype))
-        ctx.save_for_backward(input, alpha, beta)
+        ctx.save_for_backward(input, alpha, beta, output)
 
         return output
 
@@ -15,14 +15,14 @@ class MPELUFunction(torch.autograd.Function):
     @staticmethod
     @custom_bwd
     def backward(ctx, grad_output):
-        input, alpha, beta = ctx.saved_tensors
+        input, alpha, beta, output = ctx.saved_tensors
         alpha = alpha.to(input.dtype)
         beta = beta.to(input.dtype)
         grad_input = torch.zeros_like(input)
         grad_a = torch.zeros_like(alpha)
         grad_b = torch.zeros_like(beta)
 
-        mpelu_cuda.mpelu_backward(input, alpha, beta, grad_output.contiguous(), grad_input.contiguous(), grad_a.contiguous(), grad_b.contiguous())
+        mpelu_cuda.mpelu_backward(input, alpha, beta, output, grad_output.contiguous(), grad_input.contiguous(), grad_a.contiguous(), grad_b.contiguous())
         
         return grad_input, grad_a, grad_b
 

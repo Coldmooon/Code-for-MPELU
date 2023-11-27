@@ -19,9 +19,7 @@ __global__ void mpelu_forward_cuda_kernel(
 
         scalar_t in_val = input[batch_idx][channel_idx][y][x];
         if (in_val < 0) {
-            scalar_t a_val = a[channel_idx];
-            scalar_t b_val = b[channel_idx];
-            output[batch_idx][channel_idx][y][x] = a_val * (exp(b_val * in_val) - 1);
+            output[batch_idx][channel_idx][y][x] = a[channel_idx] * (exp(b[channel_idx] * in_val) - 1);
         } else {
             output[batch_idx][channel_idx][y][x] = in_val;
         }
@@ -63,6 +61,7 @@ __global__ void mpelu_backward_cuda_kernel(
     const torch::PackedTensorAccessor<scalar_t,4,torch::RestrictPtrTraits,size_t> input,
     const torch::PackedTensorAccessor<scalar_t,1,torch::RestrictPtrTraits,size_t> a,
     const torch::PackedTensorAccessor<scalar_t,1,torch::RestrictPtrTraits,size_t> b,
+    const torch::PackedTensorAccessor<scalar_t,4,torch::RestrictPtrTraits,size_t> output,    
     const torch::PackedTensorAccessor<scalar_t,4,torch::RestrictPtrTraits,size_t> grad_output,
     torch::PackedTensorAccessor<scalar_t,4,torch::RestrictPtrTraits,size_t> grad_input,
     torch::PackedTensorAccessor<scalar_t,1,torch::RestrictPtrTraits,size_t> grad_a,
@@ -78,19 +77,12 @@ __global__ void mpelu_backward_cuda_kernel(
         int y = pixel_idx / width;
 
         const scalar_t inp = input[batch_idx][channel_idx][y][x];
+        const scalar_t oup = output[batch_idx][channel_idx][y][x];
         const scalar_t grad_out = grad_output[batch_idx][channel_idx][y][x];
-        scalar_t grad_inp;
-        if (inp >= 0) {
-            grad_inp = grad_out;
-        } else {
-            const scalar_t a_val = a[channel_idx];
-            const scalar_t b_val = b[channel_idx];
-            grad_inp = grad_out * a_val * b_val * expf(b_val * inp);
-            gpuAtomicAdd(&grad_a[channel_idx], grad_out * (expf(b_val * inp) - 1));
-            gpuAtomicAdd(&grad_b[channel_idx], grad_out * a_val * inp * expf(b_val * inp));
-        }
 
-        grad_input[batch_idx][channel_idx][y][x] = grad_inp;
+        atomicAdd(&grad_a[channel_idx], grad_out * (inp <= 0) * (oup / a[channel_idx]));
+        atomicAdd(&grad_b[channel_idx], grad_out * (inp <= 0) * inp * (oup + a[channel_idx]));
+        grad_input[batch_idx][channel_idx][y][x] = grad_out * ( (inp > 0) + (inp <= 0) * b[channel_idx] * (oup + a[channel_idx]));
     }
 }
 
@@ -134,7 +126,8 @@ torch::Tensor mpelu_forward_cuda(
 void mpelu_backward_cuda(
     const torch::Tensor& input,
     const torch::Tensor& a,
-    const torch::Tensor& b,    
+    const torch::Tensor& b,
+    const torch::Tensor& output,
     const torch::Tensor& grad_output,
     torch::Tensor& grad_input,
     torch::Tensor& grad_a,
@@ -163,6 +156,7 @@ void mpelu_backward_cuda(
             input.packed_accessor<scalar_t,4,torch::RestrictPtrTraits,size_t>(),
             a.packed_accessor<scalar_t,1,torch::RestrictPtrTraits,size_t>(),
             b.packed_accessor<scalar_t,1,torch::RestrictPtrTraits,size_t>(),
+            output.packed_accessor<scalar_t,4,torch::RestrictPtrTraits,size_t>(),
             grad_output.packed_accessor<scalar_t,4,torch::RestrictPtrTraits,size_t>(),
             grad_input.packed_accessor<scalar_t,4,torch::RestrictPtrTraits,size_t>(),
             grad_a.packed_accessor<scalar_t,1,torch::RestrictPtrTraits,size_t>(),

@@ -16,6 +16,7 @@ void mpelu_backward(
     const torch::Tensor& input,
     const torch::Tensor& a,
     const torch::Tensor& b,
+    const torch::Tensor& output,
     const torch::Tensor& grad_output,
     torch::Tensor& grad_input,
     torch::Tensor& grad_a,
@@ -24,12 +25,13 @@ void mpelu_backward(
     CHECK_INPUT(input);
     CHECK_INPUT(a);
     CHECK_INPUT(b);
+    CHECK_INPUT(output);
     CHECK_INPUT(grad_output);
     CHECK_INPUT(grad_input);
     CHECK_INPUT(grad_a);
     CHECK_INPUT(grad_b);
 
-    mpelu_backward_cuda(input, a, b, grad_output, grad_input, grad_a, grad_b);
+    mpelu_backward_cuda(input, a, b, output, grad_output, grad_input, grad_a, grad_b);
 }
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m){

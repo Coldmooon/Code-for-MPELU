@@ -15,6 +15,7 @@ void mpelu_backward_cuda(
     const torch::Tensor& input,
     const torch::Tensor& a,
     const torch::Tensor& b,
+    const torch::Tensor& output,
     const torch::Tensor& grad_output,
     torch::Tensor& grad_input,
     torch::Tensor& grad_a,

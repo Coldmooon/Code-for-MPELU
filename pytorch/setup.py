@@ -12,14 +12,16 @@ sources = glob.glob('*.cpp')+glob.glob('*.cu')
 
 setup(
     name='mpelu_cuda',
-    version='1.4',
+    version='1.6',
     ext_modules=[
         CUDAExtension(
             name='mpelu_cuda',
             sources=sources,
             include_dirs=include_dirs,
-            extra_compile_args={'cxx': ['-O2'],
-                                'nvcc': ['-O2']}
+            extra_compile_args={
+                'cxx': ['-O2'],
+                'nvcc': ['-O2', '-G', '-lineinfo']  # Add debug flags here
+            }
         )
     ],
     cmdclass={
